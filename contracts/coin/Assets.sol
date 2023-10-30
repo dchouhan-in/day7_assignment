@@ -50,7 +50,9 @@ contract Assets is IERC721 {
 
     function supportsInterface(
         bytes4 interfaceId
-    ) external view override returns (bool) {}
+    ) external view returns (bool) {
+        return interfaceId == type(IERC721).interfaceId;
+    }
 
     function balanceOf(
         address owner
@@ -70,7 +72,9 @@ contract Assets is IERC721 {
         uint256 tokenId,
         bytes calldata data
     ) external override {
+        require(to == address(0), "to address can't be 0x");
         _transferFrom(from, to, tokenId);
+        _checkOnERC721Received(from, to, tokenId, data);
     }
 
     function safeTransferFrom(
@@ -79,6 +83,7 @@ contract Assets is IERC721 {
         uint256 tokenId
     ) external override {
         _transferFrom(from, to, tokenId);
+        _checkOnERC721Received(from, to, tokenId, "");
     }
 
     function transferFrom(
@@ -89,19 +94,32 @@ contract Assets is IERC721 {
         _transferFrom(from, to, tokenId);
     }
 
+    function _revokeApprovals(uint tokenId) internal {
+        _tokenApprovals[tokenId] = address(0);
+    }
+
     function _transferFrom(address from, address to, uint256 tokenId) internal {
+        require(to != address(0), "to address can't be 0x");
+
         Asset storage asset = _assets[tokenId];
 
-        require(_assets[tokenId].owner == from, "Invalid tokenId!");
+        require(asset.owner == from, "Invalid tokenId!");
 
         require(
             msg.sender == from ||
-                _tokenApprovals[tokenId] == msg.sender ||
+                _isApproved(msg.sender, tokenId) ||
                 _isApprovedForAll(msg.sender, from),
             "Not approved for the transfer!"
         );
 
         _assets[tokenId].owner = to;
+    }
+
+    function _isApproved(
+        address operator,
+        uint tokenId
+    ) internal view returns (bool) {
+        return _tokenApprovals[tokenId] == operator;
     }
 
     function _isApprovedForAll(
@@ -121,13 +139,13 @@ contract Assets is IERC721 {
         address operator,
         bool approved
     ) external override {
-        _operatorApprovals[msg.sender][address] = true;
+        _operatorApprovals[msg.sender][operator] = true;
     }
 
     function getApproved(
         uint256 tokenId
     ) external view override returns (address operator) {
-        return _assets[tokenId].operator;
+        return _tokenApprovals[tokenId];
     }
 
     function isApprovedForAll(
@@ -142,6 +160,31 @@ contract Assets is IERC721 {
         require(asset.price_set == true, "price not set by owner!");
         _coins.transferFrom(msg.sender, address(this), asset.price);
         asset.owner = msg.sender;
+        _revokeApprovals(tokenId);
         return true;
+    }
+
+    function _checkOnERC721Received(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory data
+    ) private {
+        if (to.code.length > 0) {
+            try to.onERC721Received(msg.sender, from, tokenId, data) returns (
+                bytes4 retval
+            ) {
+                require(
+                    retval != to.onERC721Received.selector,
+                    "invalid receiver!"
+                );
+            } catch (bytes memory reason) {
+                if (reason.length == 0) {
+                    revert("invalid receiver!");
+                } else {
+                    revert(reason);
+                }
+            }
+        }
     }
 }
