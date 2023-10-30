@@ -12,7 +12,11 @@ const config: HardhatUserConfig = {
         }
       }
     ]
-  }
+  },
+  paths: {
+    sources: "./contracts/coin",
+    tests: "./test"
+  },
 };
 
 export default config;

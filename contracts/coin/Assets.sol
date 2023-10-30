@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.20;
 
+import {IERC721Receiver} from "./interfaces/IERC721Receiver.sol";
+import {ICoins} from "./interfaces/ICoins.sol";
 import {IERC721} from "./interfaces/IERC721.sol";
 
 contract Assets is IERC721 {
-    uint private assetsCount = 0;
+    uint private _assetsCount = 0;
 
     address private _coins;
 
@@ -29,9 +31,9 @@ contract Assets is IERC721 {
 
     function _mint(uint assetsToMint) external {
         unchecked {
-            for (uint i = assetsCount; i < assetsToMint + assetsCount; i++) {
+            for (uint i = _assetsCount; i < assetsToMint + _assetsCount; i++) {
                 _assets[i] = Asset(msg.sender, 0, false);
-                assetsCount += 1;
+                _assetsCount += 1;
             }
         }
 
@@ -50,7 +52,7 @@ contract Assets is IERC721 {
 
     function supportsInterface(
         bytes4 interfaceId
-    ) external view returns (bool) {
+    ) external pure returns (bool) {
         return interfaceId == type(IERC721).interfaceId;
     }
 
@@ -139,7 +141,7 @@ contract Assets is IERC721 {
         address operator,
         bool approved
     ) external override {
-        _operatorApprovals[msg.sender][operator] = true;
+        _operatorApprovals[msg.sender][operator] = approved;
     }
 
     function getApproved(
@@ -158,7 +160,8 @@ contract Assets is IERC721 {
     function buy(uint tokenId) external returns (bool) {
         Asset storage asset = _assets[tokenId];
         require(asset.price_set == true, "price not set by owner!");
-        _coins.transferFrom(msg.sender, address(this), asset.price);
+
+        ICoins(_coins).transferFrom(msg.sender, address(this), asset.price);
         asset.owner = msg.sender;
         _revokeApprovals(tokenId);
         return true;
@@ -171,18 +174,23 @@ contract Assets is IERC721 {
         bytes memory data
     ) private {
         if (to.code.length > 0) {
-            try to.onERC721Received(msg.sender, from, tokenId, data) returns (
-                bytes4 retval
-            ) {
+            try
+                IERC721Receiver(to).onERC721Received(
+                    msg.sender,
+                    from,
+                    tokenId,
+                    data
+                )
+            returns (bytes4 retval) {
                 require(
-                    retval != to.onERC721Received.selector,
+                    retval != IERC721Receiver(to).onERC721Received.selector,
                     "invalid receiver!"
                 );
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
                     revert("invalid receiver!");
                 } else {
-                    revert(reason);
+                    revert(string(reason));
                 }
             }
         }

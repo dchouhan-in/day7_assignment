@@ -23,9 +23,12 @@ contract Coins is IERC20 {
     mapping(address account => mapping(address spender => uint256))
         private _allowances;
 
-    function _mint(address _to, uint256 _amount) public {
-        require(msg.sender == _deployer, "only contract owner can mint!");
-        _balances[_to] += _amount * 10e18;
+    function name() external view override returns (string memory) {
+        return _name;
+    }
+
+    function symbol() external view override returns (string memory) {
+        return _symbol;
     }
 
     function totalSupply() external view override returns (uint256) {
@@ -79,11 +82,9 @@ contract Coins is IERC20 {
         return true;
     }
 
-    function symbol() external view override returns (string memory) {
-        return _symbol;
-    }
-
-    function name() external view override returns (string memory) {
-        return _name;
+    function _mint(address _to, uint256 _amount) public {
+        require(msg.sender == _deployer, "only contract owner can mint!");
+        _balances[_to] += _amount * 10e18;
+        _totalSupply += _amount * 10e18;
     }
 }
