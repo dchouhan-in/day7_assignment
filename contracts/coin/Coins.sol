@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {IERC20} from "./interfaces/IERC20.sol";
 
@@ -11,9 +11,9 @@ contract Coins is IERC20 {
 
     address private _deployer;
 
-    constructor(string memory name, string memory symbol) {
-        _name = name;
-        _symbol = symbol;
+    constructor(string memory tokenName, string memory tokenSymbol) {
+        _name = tokenName;
+        _symbol = tokenSymbol;
         _deployer = msg.sender;
         _mint(msg.sender, 1000);
     }
@@ -25,7 +25,7 @@ contract Coins is IERC20 {
 
     function _mint(address _to, uint256 _amount) public {
         require(msg.sender == _deployer, "only contract owner can mint!");
-        _balances[_to] += _amount;
+        _balances[_to] += _amount * 10e18;
     }
 
     function totalSupply() external view override returns (uint256) {
@@ -77,5 +77,13 @@ contract Coins is IERC20 {
         _balances[from] -= value;
         _balances[to] += value;
         return true;
+    }
+
+    function symbol() external view override returns (string memory) {
+        return _symbol;
+    }
+
+    function name() external view override returns (string memory) {
+        return _name;
     }
 }

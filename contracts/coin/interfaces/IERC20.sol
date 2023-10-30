@@ -25,6 +25,10 @@ interface IERC20 {
         uint256 value
     );
 
+    function symbol() external view returns (string memory);
+
+    function name() external view returns (string memory);
+
     /**
      * @dev Returns the value of tokens in existence.
      */
