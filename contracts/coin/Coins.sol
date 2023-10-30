@@ -76,8 +76,10 @@ contract Coins is IERC20 {
         address to,
         uint256 value
     ) external override returns (bool) {
-
-        require(_allowances[from][msg.sender] >= value, "insufficient balance!");
+        require(
+            _allowances[from][msg.sender] >= value,
+            "insufficient balance!"
+        );
         _balances[from] -= value;
         _balances[to] += value;
         _allowances[from][msg.sender] -= value;

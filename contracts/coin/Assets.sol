@@ -132,8 +132,8 @@ contract Assets is IERC721 {
         require(asset.price_set == true, "price not set by owner!");
 
         ICoins(_coins).transferFrom(msg.sender, address(this), asset.price);
-        asset.owner = msg.sender;
-        _revokeApprovals(tokenId);
+        _transferFrom(asset.owner, msg.sender, tokenId);
+
         return true;
     }
 

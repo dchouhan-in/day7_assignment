@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { Assets, Coins } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
@@ -149,20 +148,22 @@ describe("Main", function () {
 
         it("should change owner to coin contract!", async () => {
             const swapToken = 6;
+            const price = 10;
+            console.log(ownerAddress, await assets.getAddress(), "dddddd");
 
-            await assets.setPrice(swapToken, 10)
+
+            await assets.setPrice(swapToken, price)
 
             const ownerInitialBal = await assets.balanceOf(owner);
-            await coins.approve(await assets.getAddress(), swapToken);
-            
+            await coins.approve(await assets.getAddress(), price);
+
             await assets.buy(swapToken);
             const balance = await assets.balanceOf(owner);
-            const balanceOfContract = await assets.balanceOf(coinsAddress);
+            const balanceOfContract = await coins.balanceOf(await assets.getAddress());
             const newOwner = await assets.ownerOf(swapToken);
 
-            expect(balanceOfContract).to.equals(1);
-            expect(balance).to.equals(ownerInitialBal + 1n);
-            expect(newOwner).to.equals(coinsAddress);
+            expect(balanceOfContract).to.equals(price);
+            expect(newOwner).to.equals(ownerAddress);
 
         })
 
