@@ -79,6 +79,7 @@ contract Coins is IERC20 {
         require(_allowances[from][msg.sender] >= value);
         _balances[from] -= value;
         _balances[to] += value;
+        _allowances[from][msg.sender] -= value;
         return true;
     }
 

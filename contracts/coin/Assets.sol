@@ -4,15 +4,12 @@ pragma solidity 0.8.20;
 import {IERC721Receiver} from "./interfaces/IERC721Receiver.sol";
 import {ICoins} from "./interfaces/ICoins.sol";
 import {IERC721} from "./interfaces/IERC721.sol";
+import "hardhat/console.sol";
 
 contract Assets is IERC721 {
     uint private _assetsCount = 0;
 
     address private _coins;
-
-    constructor(address coins) {
-        _coins = coins;
-    }
 
     mapping(uint tokenId => Asset assetDetails) private _assets;
 
@@ -29,18 +26,21 @@ contract Assets is IERC721 {
         bool price_set;
     }
 
-    function _mint(uint assetsToMint) external {
-        unchecked {
-            for (uint i = _assetsCount; i < assetsToMint + _assetsCount; i++) {
-                _assets[i] = Asset(msg.sender, 0, false);
-                _assetsCount += 1;
-            }
+    constructor(address coins) {
+        _coins = coins;
+    }
+
+    function mint(uint assetsToMint) external {
+        uint totalToMint = assetsToMint + _assetsCount;
+        for (uint i = _assetsCount; i < totalToMint; i++) {
+            _assets[i] = Asset(msg.sender, 0, false);
+            _assetsCount += 1;
         }
 
         _balances[msg.sender] += assetsToMint;
     }
 
-    function _setPrice(uint asset_id, uint price) external {
+    function setPrice(uint asset_id, uint price) external {
         Asset storage _asset = _assets[asset_id];
         require(
             _asset.owner == msg.sender,
@@ -48,6 +48,11 @@ contract Assets is IERC721 {
         );
         _asset.price = price;
         _asset.price_set = true;
+    }
+
+    function getPrice(uint asset_id) external view returns (uint) {
+        Asset storage _asset = _assets[asset_id];
+        return _asset.price;
     }
 
     function supportsInterface(
@@ -94,41 +99,6 @@ contract Assets is IERC721 {
         uint256 tokenId
     ) external override {
         _transferFrom(from, to, tokenId);
-    }
-
-    function _revokeApprovals(uint tokenId) internal {
-        _tokenApprovals[tokenId] = address(0);
-    }
-
-    function _transferFrom(address from, address to, uint256 tokenId) internal {
-        require(to != address(0), "to address can't be 0x");
-
-        Asset storage asset = _assets[tokenId];
-
-        require(asset.owner == from, "Invalid tokenId!");
-
-        require(
-            msg.sender == from ||
-                _isApproved(msg.sender, tokenId) ||
-                _isApprovedForAll(msg.sender, from),
-            "Not approved for the transfer!"
-        );
-
-        _assets[tokenId].owner = to;
-    }
-
-    function _isApproved(
-        address operator,
-        uint tokenId
-    ) internal view returns (bool) {
-        return _tokenApprovals[tokenId] == operator;
-    }
-
-    function _isApprovedForAll(
-        address operator,
-        address owner
-    ) internal view returns (bool) {
-        return _operatorApprovals[owner][operator] == true;
     }
 
     function approve(address to, uint256 tokenId) external override {
@@ -194,5 +164,40 @@ contract Assets is IERC721 {
                 }
             }
         }
+    }
+
+    function _revokeApprovals(uint tokenId) internal {
+        _tokenApprovals[tokenId] = address(0);
+    }
+
+    function _transferFrom(address from, address to, uint256 tokenId) internal {
+        require(to != address(0), "to address can't be 0x");
+
+        Asset storage asset = _assets[tokenId];
+
+        require(asset.owner == from, "Invalid tokenId!");
+
+        require(
+            msg.sender == from ||
+                _isApproved(msg.sender, tokenId) ||
+                _isApprovedForAll(msg.sender, from),
+            "Not approved for the transfer!"
+        );
+
+        _assets[tokenId].owner = to;
+    }
+
+    function _isApproved(
+        address operator,
+        uint tokenId
+    ) internal view returns (bool) {
+        return _tokenApprovals[tokenId] == operator;
+    }
+
+    function _isApprovedForAll(
+        address operator,
+        address owner
+    ) internal view returns (bool) {
+        return _operatorApprovals[owner][operator] == true;
     }
 }
