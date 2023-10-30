@@ -15,7 +15,7 @@ contract Coins is IERC20 {
         _name = tokenName;
         _symbol = tokenSymbol;
         _deployer = msg.sender;
-        _mint(msg.sender, 1000);
+        mint(msg.sender, 1000);
     }
 
     mapping(address account => uint256) private _balances;
@@ -76,14 +76,15 @@ contract Coins is IERC20 {
         address to,
         uint256 value
     ) external override returns (bool) {
-        require(_allowances[from][msg.sender] >= value);
+
+        require(_allowances[from][msg.sender] >= value, "insufficient balance!");
         _balances[from] -= value;
         _balances[to] += value;
         _allowances[from][msg.sender] -= value;
         return true;
     }
 
-    function _mint(address _to, uint256 _amount) public {
+    function mint(address _to, uint256 _amount) public {
         require(msg.sender == _deployer, "only contract owner can mint!");
         _balances[_to] += _amount * 10e18;
         _totalSupply += _amount * 10e18;
