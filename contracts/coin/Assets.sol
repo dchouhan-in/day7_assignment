@@ -8,28 +8,34 @@ contract Assets is IERC721 {
 
     address private _coins;
 
-    struct Asset {
-        address owner;
-        uint price;
-        bool price_set;
-        address operator;
-    }
-
     constructor(address coins) {
         _coins = coins;
     }
 
     mapping(uint tokenId => Asset assetDetails) private _assets;
 
-    mapping(address owner => uint[] tokenIds) private _tokens;
+    mapping(address owner => uint) private _balances;
+
+    mapping(uint256 tokenId => address) private _tokenApprovals;
+
+    mapping(address owner => mapping(address operator => bool))
+        private _operatorApprovals;
+
+    struct Asset {
+        address owner;
+        uint price;
+        bool price_set;
+    }
 
     function _mint(uint assetsToMint) external {
         unchecked {
             for (uint i = assetsCount; i < assetsToMint + assetsCount; i++) {
-                _assets[i] = Asset(msg.sender, 0, false, address(0));
+                _assets[i] = Asset(msg.sender, 0, false);
                 assetsCount += 1;
             }
         }
+
+        _balances[msg.sender] += assetsToMint;
     }
 
     function _setPrice(uint asset_id, uint price) external {
@@ -49,7 +55,7 @@ contract Assets is IERC721 {
     function balanceOf(
         address owner
     ) external view override returns (uint256 balance) {
-        return _tokens[owner].length;
+        return _balances[owner];
     }
 
     function ownerOf(
@@ -83,64 +89,39 @@ contract Assets is IERC721 {
         _transferFrom(from, to, tokenId);
     }
 
-    // function _transferAll(
-    //     address from,
-    //     address to,
-    //     uint[] memory tokenIds
-    // ) internal {
-    //     for (uint i = 0; i < tokenIds.length; i++) {
-    //         _assets[tokenIds[i]].owner = to;
-    //     }
-    //     _tokens[to] = tokenIds;
-    //     delete _tokens[from];
-    // }
-
     function _transferFrom(address from, address to, uint256 tokenId) internal {
         Asset storage asset = _assets[tokenId];
 
+        require(_assets[tokenId].owner == from, "Invalid tokenId!");
+
         require(
-            (_assets[tokenId].owner == from) &&
-                (msg.sender == from || _assets[tokenId].operator == msg.sender),
-            "only owner or operator can transfer!"
+            msg.sender == from ||
+                _tokenApprovals[tokenId] == msg.sender ||
+                _isApprovedForAll(msg.sender, from),
+            "Not approved for the transfer!"
         );
 
-        asset.owner = to;
-        uint indexOfToken = _indexOf(tokenId, _tokens[from]);
-        delete _tokens[from][indexOfToken];
-        _tokens[to].push(tokenId);
+        _assets[tokenId].owner = to;
     }
 
-    function _indexOf(
-        uint tokenId,
-        uint[] memory tokens
-    ) internal pure returns (uint) {
-        unchecked {
-            for (uint i = 0; i < tokens.length; i++) {
-                if (tokens[i] == tokenId) {
-                    return i;
-                }
-            }
-        }
+    function _isApprovedForAll(
+        address operator,
+        address owner
+    ) internal view returns (bool) {
+        return _operatorApprovals[owner][operator] == true;
     }
 
     function approve(address to, uint256 tokenId) external override {
-        require(
-            _assets[tokenId].owner == msg.sender,
-            "only owner of asset can approve!"
-        );
-        _assets[tokenId].operator = to;
+        require(_assets[tokenId].owner == msg.sender, "Invalid TokenId!");
+
+        _tokenApprovals[tokenId] = to;
     }
 
     function setApprovalForAll(
         address operator,
         bool approved
     ) external override {
-        uint[] memory tokens = _tokens[msg.sender];
-        unchecked {
-            for (uint i = 0; i < tokens.length; i++) {
-                _assets[tokens[i]].operator = operator;
-            }
-        }
+        _operatorApprovals[msg.sender][address] = true;
     }
 
     function getApproved(
@@ -153,15 +134,7 @@ contract Assets is IERC721 {
         address owner,
         address operator
     ) external view override returns (bool) {
-        uint[] storage tokens = _tokens[msg.sender];
-        unchecked {
-            for (uint i = 0; i < tokens.length; i++) {
-                if (_assets[tokens[i]].operator == address(0)) {
-                    return false;
-                }
-            }
-            return true;
-        }
+        return _operatorApprovals[owner][operator];
     }
 
     function buy(uint tokenId) external returns (bool) {
