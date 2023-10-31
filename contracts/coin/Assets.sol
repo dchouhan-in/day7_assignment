@@ -127,6 +127,7 @@ contract Assets is IERC721 {
     }
 
     function buy(uint tokenId) external returns (bool) {
+
         Asset storage asset = _assets[tokenId];
 
         require(asset.price_set == true, "price not set by owner!");

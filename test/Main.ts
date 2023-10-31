@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { Assets, Coins } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
@@ -8,7 +9,6 @@ describe("Main", function () {
     const tokenName = "NEW TOKEN"
     const tokenSymbol = "NTK"
     let coins: Coins
-    let coinsAddress: string
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
     let otherAccount2: HardhatEthersSigner
@@ -149,21 +149,61 @@ describe("Main", function () {
         it("should change owner to coin contract!", async () => {
             const swapToken = 6;
             const price = 10;
-            console.log(ownerAddress, await assets.getAddress(), "dddddd");
-
 
             await assets.setPrice(swapToken, price)
 
             const ownerInitialBal = await assets.balanceOf(owner);
+
             await coins.approve(await assets.getAddress(), price);
 
             await assets.buy(swapToken);
             const balance = await assets.balanceOf(owner);
+
             const balanceOfContract = await coins.balanceOf(await assets.getAddress());
             const newOwner = await assets.ownerOf(swapToken);
 
             expect(balanceOfContract).to.equals(price);
+            expect(balance).to.equals(ownerInitialBal);
             expect(newOwner).to.equals(ownerAddress);
+
+        })
+
+        it("should revert for unapproved buyers!", async () => {
+            const swapToken = 7;
+            const price = 2000;
+
+            await coins.mint(otherAccountAddress, 1)
+
+            await assets.setPrice(swapToken, price)
+
+
+            await coins.connect(otherAccount).approve(await assets.getAddress(), price);
+
+
+            expect(assets.connect(otherAccount).buy(swapToken)).to.be.reverted
+
+
+        })
+
+        it("should allow others to buy!", async () => {
+            const swapToken = 7;
+            const price = 2000;
+
+            await coins.mint(otherAccountAddress, 1)
+
+            await assets.setPrice(swapToken, price)
+
+            const initialOwner = await assets.ownerOf(swapToken);
+
+            await coins.connect(otherAccount).approve(await assets.getAddress(), price);
+
+            await assets.approve(otherAccount, swapToken);
+
+            await assets.connect(otherAccount).buy(swapToken)
+
+            const newOwner = await assets.ownerOf(swapToken);
+            expect(newOwner).to.not.equals(initialOwner)
+            expect(newOwner).to.equals(otherAccountAddress)
 
         })
 
