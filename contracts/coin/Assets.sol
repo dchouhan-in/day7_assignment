@@ -103,6 +103,7 @@ contract Assets is IERC721 {
     function approve(address to, uint256 tokenId) external override {
         require(_assets[tokenId].owner == msg.sender, "Invalid TokenId!");
         _tokenApprovals[tokenId] = to;
+        emit Approval(_assets[tokenId].owner, to, tokenId);
     }
 
     function setApprovalForAll(
@@ -110,6 +111,7 @@ contract Assets is IERC721 {
         bool approved
     ) external override {
         _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
 
     function getApproved(
@@ -126,7 +128,6 @@ contract Assets is IERC721 {
     }
 
     function buy(uint tokenId) external returns (bool) {
-
         Asset storage asset = _assets[tokenId];
 
         require(asset.price_set == true, "price not set by owner!");
@@ -187,6 +188,7 @@ contract Assets is IERC721 {
         _assets[tokenId].owner = to;
         _balances[from] -= 1;
         _balances[to] += 1;
+        emit Transfer(from, to, tokenId);
     }
 
     function _isApproved(
