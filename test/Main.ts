@@ -8,6 +8,7 @@ describe("Main", function () {
     const tokenName = "NEW TOKEN"
     const tokenSymbol = "NTK"
     let coins: Coins
+    let coinsAddress: string
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
     let otherAccount2: HardhatEthersSigner
