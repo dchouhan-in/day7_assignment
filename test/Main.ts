@@ -11,6 +11,7 @@ describe("Main", function () {
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
     let otherAccount2: HardhatEthersSigner
+    let coinsAddress: string
     let ownerAddress: string
     let otherAccountAddress: string
     let otherAccount2Address: string
@@ -18,7 +19,7 @@ describe("Main", function () {
 
     describe("Coins", async function () {
 
-        before("Deploy Contract!", async () => {
+        before("Deploy Coins Contract!", async () => {
             [owner, otherAccount, otherAccount2] = await ethers.getSigners();
 
             ownerAddress = await owner.getAddress();
@@ -51,12 +52,12 @@ describe("Main", function () {
             await coins.mint(otherAccount2Address, 1000);
             await coins.balanceOf(otherAccount2Address)
             const currentBal = await coins.balanceOf(otherAccount2Address);
-            expect(intialBal + 10n ** 22n).to.equal(currentBal);
+            expect(intialBal + 1000n).to.equal(currentBal);
         });
 
         it("should have the correct total supply", async () => {
             const totalSupply = await coins.totalSupply();
-            expect(totalSupply).to.equal(2n * 10n ** 22n)
+            expect(totalSupply).to.equal(BigInt(1000) * BigInt(10n**18n) + BigInt(1000))
         });
 
         it("should have the correct decimals", async () => {
@@ -78,7 +79,7 @@ describe("Main", function () {
     describe("Assets", async function () {
 
 
-        before("Deploy Contract!", async () => {
+        before("Deploy Assets Contract!", async () => {
 
             assets = await ethers.deployContract("Assets", [coins.getAddress()], owner);
 
@@ -188,7 +189,7 @@ describe("Main", function () {
             const swapToken = 7;
             const price = 2000;
 
-            await coins.mint(otherAccountAddress, 1)
+            await coins.mint(otherAccountAddress, 10000000)
 
             await assets.setPrice(swapToken, price)
 

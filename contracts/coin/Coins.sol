@@ -3,19 +3,33 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "./interfaces/IERC20.sol";
 
+/// @notice contract for ERC20 token (Coins).
+/**
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
+ * the Metadata extension, but not including the Enumerable extension, which is available separately as
+ * {ERC721Enumerable}.
+ */
+/// @title an implementation of ERC20 fungible token contract.
+/// @author dchouhan-in@github.com
 contract Coins is IERC20 {
     uint256 private _totalSupply;
 
+    // token name
     string private _name;
+    // token symbol
     string private _symbol;
 
+    // contract owner, currently immutable
     address private _deployer;
 
+    /**
+     * @dev Initializes the contract by setting a `name` and a `symbol` and `deployer` to the token collection.
+     */
     constructor(string memory tokenName, string memory tokenSymbol) {
         _name = tokenName;
         _symbol = tokenSymbol;
         _deployer = msg.sender;
-        mint(msg.sender, 1000);
+        mint(msg.sender, 1000 * 1e18);
     }
 
     mapping(address account => uint256) private _balances;
@@ -23,28 +37,39 @@ contract Coins is IERC20 {
     mapping(address account => mapping(address spender => uint256))
         private _allowances;
 
+    /// @dev Returns name of token
     function name() external view override returns (string memory) {
         return _name;
     }
 
+    /// @dev Returns name of token
     function symbol() external view override returns (string memory) {
         return _symbol;
     }
 
+    /// @notice total tokens ever issued
+    /// @dev Returns total supply
     function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
+    /** 
+     *  @dev Returns total decimals used in representation,
+    i.e : if the balance of address is 1e17, it means the address owns .1 of the Coin.
+
+    */
     function decimals() external pure returns (uint8) {
         return 18;
     }
 
+    /// @dev returns balance of an address
     function balanceOf(
         address account
     ) external view override returns (uint256) {
         return _balances[account];
     }
 
+    /// @dev transfers coins to the address
     function transfer(
         address to,
         uint256 value
@@ -56,6 +81,8 @@ contract Coins is IERC20 {
         return true;
     }
 
+    /// @notice returns the amount a third party spender can spend on address's behalf
+    /// @dev returns allowance
     function allowance(
         address owner,
         address spender
@@ -63,6 +90,8 @@ contract Coins is IERC20 {
         return _allowances[owner][spender];
     }
 
+    /// @notice approve a third party spender can spend on address's behalf
+    /// @dev approve spender
     function approve(
         address spender,
         uint256 value
@@ -71,6 +100,7 @@ contract Coins is IERC20 {
         return true;
     }
 
+    /// @dev transfer coins `from` address to `to` address, caller must be approved first.
     function transferFrom(
         address from,
         address to,
@@ -87,9 +117,12 @@ contract Coins is IERC20 {
         return true;
     }
 
+    /** 
+     @dev mints `_amount` number of coins to `to` address, only owner of contract i.e deployer, can mint.
+     */
     function mint(address _to, uint256 _amount) public {
         require(msg.sender == _deployer, "only contract owner can mint!");
-        _balances[_to] += _amount * 10e18;
-        _totalSupply += _amount * 10e18;
+        _balances[_to] += _amount;
+        _totalSupply += _amount;
     }
 }
