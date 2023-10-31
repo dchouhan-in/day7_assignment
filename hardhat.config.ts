@@ -14,8 +14,8 @@ const config: HardhatUserConfig = {
     ]
   },
   paths: {
-    sources: "./contracts/coin",
-    tests: "./test"
+    sources: "./contracts/weth_dummy",
+    tests: "./test/weth"
   },
 };
 

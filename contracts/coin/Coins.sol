@@ -10,20 +10,20 @@ import {IERC20} from "./interfaces/IERC20.sol";
 /// @title an implementation of ERC20 fungible token contract.
 /// @author dchouhan-in@github.com
 contract Coins is IERC20 {
-    uint256 private _totalSupply;
+    uint256 internal _totalSupply;
 
     // token name
-    string private _name;
+    string internal _name;
     // token symbol
-    string private _symbol;
+    string internal _symbol;
 
     // contract owner, currently immutable
-    address private _deployer;
+    address internal _deployer;
 
-    mapping(address account => uint256) private _balances;
+    mapping(address account => uint256) internal _balances;
 
     mapping(address account => mapping(address spender => uint256))
-        private _allowances;
+        internal _allowances;
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` and `deployer` to the token collection.
@@ -56,7 +56,7 @@ contract Coins is IERC20 {
     i.e : if the balance of address is 1e17, it means the address owns .1 of the Coin.
 
     */
-    function decimals() external pure returns (uint8) {
+    function decimals() external pure virtual returns (uint8) {
         return 18;
     }
 
@@ -118,7 +118,7 @@ contract Coins is IERC20 {
     /** 
      @dev mints `_amount` number of coins to `to` address, only owner of contract i.e deployer, can mint.
      */
-    function mint(address _to, uint256 _amount) public {
+    function mint(address _to, uint256 _amount) public virtual {
         require(msg.sender == _deployer, "only contract owner can mint!");
         _balances[_to] += _amount;
         _totalSupply += _amount;

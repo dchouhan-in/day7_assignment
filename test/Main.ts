@@ -5,8 +5,8 @@ import { Assets, Coins } from "../typechain-types";
 
 
 describe("Main", function () {
-    const tokenName = "NEW TOKEN"
-    const tokenSymbol = "NTK"
+    // const tokenName = "NEW TOKEN"
+    // const tokenSymbol = "NTK"
     let coins: Coins
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
@@ -27,7 +27,7 @@ describe("Main", function () {
             otherAccount2Address = await otherAccount2.getAddress();
 
 
-            coins = await ethers.deployContract("Coins", [tokenName, tokenSymbol], owner);
+            coins = await ethers.deployContract("Weth", [tokenName, tokenSymbol], owner);
 
             coinsAddress = await coins.getAddress()
 
