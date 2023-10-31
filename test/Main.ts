@@ -1,8 +1,7 @@
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
-import { Contract } from "ethers";
 import { ethers } from "hardhat";
 import { Assets, Coins } from "../typechain-types";
-import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 
 describe("Main", function () {

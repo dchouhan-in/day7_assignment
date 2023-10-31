@@ -4,7 +4,6 @@ pragma solidity 0.8.20;
 import {IERC721Receiver} from "./interfaces/IERC721Receiver.sol";
 import {ICoins} from "./interfaces/ICoins.sol";
 import {IERC721} from "./interfaces/IERC721.sol";
-import "hardhat/console.sol";
 
 contract Assets is IERC721 {
     uint private _assetsCount = 0;
