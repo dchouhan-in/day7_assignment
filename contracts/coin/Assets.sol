@@ -5,6 +5,14 @@ import {IERC721Receiver} from "./interfaces/IERC721Receiver.sol";
 import {ICoins} from "./interfaces/ICoins.sol";
 import {IERC721} from "./interfaces/IERC721.sol";
 
+/// @notice contract for ERC721 token (Assets).
+/**
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
+ * the Metadata extension, but not including the Enumerable extension, which is available separately as
+ * {ERC721Enumerable}.
+ */
+/// @title an implementation of ERC721 fungible token contract.
+/// @author dchouhan-in@github.com
 contract Assets is IERC721 {
     uint private _assetsCount = 0;
 
@@ -25,10 +33,13 @@ contract Assets is IERC721 {
         bool price_set;
     }
 
+    /// @dev initializes Assets contract, by setting address of pre deployed `Coins` contract
     constructor(address coins) {
         _coins = coins;
     }
 
+    /// @notice mints Assets to the caller, price has to be set later on
+    /// @dev mints Assets to the caller
     function mint(uint assetsToMint) external {
         uint totalToMint = assetsToMint + _assetsCount;
         for (uint i = _assetsCount; i < totalToMint; i++) {
@@ -39,6 +50,8 @@ contract Assets is IERC721 {
         _balances[msg.sender] += assetsToMint;
     }
 
+    /// @notice set price of the asset of the owner, only owner can set price of the asset, asset price can be 0 as well.
+    /// @dev set price of the asset.
     function setPrice(uint asset_id, uint price) external {
         Asset storage _asset = _assets[asset_id];
         require(
@@ -49,29 +62,38 @@ contract Assets is IERC721 {
         _asset.price_set = true;
     }
 
+    /// @notice get price of the asset
+    /// @dev get price of the asset
     function getPrice(uint asset_id) external view returns (uint) {
         Asset storage _asset = _assets[asset_id];
         return _asset.price;
     }
 
+    /// @dev check if the `interfaceId` is supported
     function supportsInterface(
         bytes4 interfaceId
     ) external pure returns (bool) {
         return interfaceId == type(IERC721).interfaceId;
     }
 
+    /// @notice returns balance, of the token `owner` address. it returns the number of tokens the address owns
+    /// @dev returns balance of `owner`
     function balanceOf(
         address owner
     ) external view override returns (uint256 balance) {
         return _balances[owner];
     }
 
+    /// @notice returns owner of token
+    /// @dev returns owner of `tokenId`
     function ownerOf(
         uint256 tokenId
     ) external view override returns (address owner) {
         return _assets[tokenId].owner;
     }
 
+    /// @notice safe transfers token from one address to another, caller needs to be approved beforehand.
+    /// @dev safe transfers token with `tokenId`, from `from` address to `to` address.
     function safeTransferFrom(
         address from,
         address to,
@@ -83,6 +105,8 @@ contract Assets is IERC721 {
         _checkOnERC721Received(from, to, tokenId, data);
     }
 
+    /// @notice safe transfers token from one address to another, caller needs to be approved beforehand.
+    /// @dev safe transfers token with `tokenId`, from `from` address to `to` address.
     function safeTransferFrom(
         address from,
         address to,
@@ -92,6 +116,8 @@ contract Assets is IERC721 {
         _checkOnERC721Received(from, to, tokenId, "");
     }
 
+    /// @notice transfers token from one address to another, caller needs to be approved beforehand.
+    /// @dev transfers token with `tokenId`, from `from` address to `to` address.
     function transferFrom(
         address from,
         address to,
@@ -100,11 +126,15 @@ contract Assets is IERC721 {
         _transferFrom(from, to, tokenId);
     }
 
+    /// @notice approve address to transfer token in owner's behalf
+    /// @dev approve `to` address to transfer token with `tokenId` in owner's behalf
     function approve(address to, uint256 tokenId) external override {
         require(_assets[tokenId].owner == msg.sender, "Invalid TokenId!");
         _tokenApprovals[tokenId] = to;
     }
 
+    /// @notice approve for entire tokens of the owner
+    /// @dev approve `operator` for entire tokens of the owner.
     function setApprovalForAll(
         address operator,
         bool approved
@@ -112,12 +142,16 @@ contract Assets is IERC721 {
         _operatorApprovals[msg.sender][operator] = approved;
     }
 
+    /// @notice get approved operator of the token
+    /// @dev get operator of the token, returns `0x` for none.
     function getApproved(
         uint256 tokenId
     ) external view override returns (address operator) {
         return _tokenApprovals[tokenId];
     }
 
+    /// @notice check if an operator is approved for all tokens of the owner address
+    /// @dev check if an operator is approved for all tokens of the owner address, returns (bool)
     function isApprovedForAll(
         address owner,
         address operator
@@ -125,8 +159,12 @@ contract Assets is IERC721 {
         return _operatorApprovals[owner][operator];
     }
 
+    /**
+     * @notice buy Assets in exchange of Coins, buyer needs to have sufficient balance in your Coins address.
+     * also buyer needs to approve this contract address in Coins contract.
+     */
+    /// @dev buy Asset with `tokenId` in exchange of Coins, buyer needs to have sufficient balance in your Coins address.
     function buy(uint tokenId) external returns (bool) {
-
         Asset storage asset = _assets[tokenId];
 
         require(asset.price_set == true, "price not set by owner!");

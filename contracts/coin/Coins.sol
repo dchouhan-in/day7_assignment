@@ -5,9 +5,7 @@ import {IERC20} from "./interfaces/IERC20.sol";
 
 /// @notice contract for ERC20 token (Coins).
 /**
- * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
- * the Metadata extension, but not including the Enumerable extension, which is available separately as
- * {ERC721Enumerable}.
+ * @dev Implementation of https://eips.ethereum.org/EIPS/eip-20[ERC20] Non-Fungible Token Standardy as
  */
 /// @title an implementation of ERC20 fungible token contract.
 /// @author dchouhan-in@github.com
@@ -22,6 +20,11 @@ contract Coins is IERC20 {
     // contract owner, currently immutable
     address private _deployer;
 
+    mapping(address account => uint256) private _balances;
+
+    mapping(address account => mapping(address spender => uint256))
+        private _allowances;
+
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` and `deployer` to the token collection.
      */
@@ -31,11 +34,6 @@ contract Coins is IERC20 {
         _deployer = msg.sender;
         mint(msg.sender, 1000 * 1e18);
     }
-
-    mapping(address account => uint256) private _balances;
-
-    mapping(address account => mapping(address spender => uint256))
-        private _allowances;
 
     /// @dev Returns name of token
     function name() external view override returns (string memory) {
