@@ -49,4 +49,5 @@ const config: HardhatUserConfig = {
 
 export default config;
 
-require("./scripts/task")
+import "./scripts/task";
+import "hardhat-deploy";
