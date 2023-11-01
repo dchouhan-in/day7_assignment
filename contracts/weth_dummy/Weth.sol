@@ -1,6 +1,7 @@
 pragma solidity 0.8.20;
 
 import {Coins} from "../coin/Coins.sol";
+import "hardhat/console.sol";
 
 contract WETH is Coins {
     constructor() Coins("wrapped ether", "WETH") {}
@@ -8,13 +9,14 @@ contract WETH is Coins {
     function mint(address _to, uint256 _amount) public override {}
 
     function deposit() public payable {
-        uint _amount = msg.value * 10;
+        require(msg.value > 10e8, "atleast 10e8 wei must be sent!");
+        uint _amount = msg.value / 10e8;
         _balances[msg.sender] += _amount;
         _totalSupply += _amount;
     }
 
     function withdraw(uint256 amount) public payable {
-        uint _amount = amount / 10;
+        uint _amount = amount * 10e8;
         require(_balances[msg.sender] >= amount, "insufficient balance!");
         _balances[msg.sender] -= amount;
         _totalSupply -= amount;
