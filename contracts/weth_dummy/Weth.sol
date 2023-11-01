@@ -4,7 +4,7 @@ import {Coins} from "../coin/Coins.sol";
 import "hardhat/console.sol";
 
 contract WETH is Coins {
-    constructor() Coins("wrapped ether", "WETH") {}
+    constructor() Coins("dummy wrapped ether", "WETH") {}
 
     function mint(address _to, uint256 _amount) public override {}
 

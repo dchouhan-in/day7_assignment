@@ -123,4 +123,5 @@ contract Coins is IERC20 {
         _balances[_to] += _amount;
         _totalSupply += _amount;
     }
+    // TODO: burn, mint internal, common transfer.
 }

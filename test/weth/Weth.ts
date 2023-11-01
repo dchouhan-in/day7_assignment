@@ -16,7 +16,7 @@ describe("Main", function () {
 
 
     describe("weth", async function () {
-        const tokenName = "wrapped ether"
+        const tokenName = "dummy wrapped ether"
         const tokenSymbol = "WETH"
 
         before("Deploy weth Contract!", async () => {
