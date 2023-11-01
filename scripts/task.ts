@@ -1,18 +1,16 @@
 import { task } from "hardhat/config";
 import { WETH } from "../typechain-types";
+import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-task("balances", "Prints the balances of all the addresses!")
+task("balance", "Prints the balances of all the addresses!")
     .addParam("contract", "contract address")
-    .addParam("count", "number of addresses to query!")
     .setAction(async (arg) => {
 
-        const signers: Array<any> = await ethers.getSigners()
+        const signer: HardhatEthersSigner = (await ethers.getSigners())[0];
         const contract = await ethers.getContractAt("WETH", arg.contract)
 
-        for (const signer of signers.slice(0, arg.count)) {
-            const balance = await contract.balanceOf(signer.address)
-            console.log(signer.address, "-", balance);
-        }
+        const balance = await contract.balanceOf(signer.address)
+        console.log(signer.address, "-", balance);
 
     })
 

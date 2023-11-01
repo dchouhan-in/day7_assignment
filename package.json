@@ -1,6 +1,7 @@
 {
 	"dependencies": {
-		"hardhat": "^2.18.3"
+		"hardhat": "^2.18.3",
+		"hardhat-deploy": "^0.11.43"
 	},
 	"devDependencies": {
 		"@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -22,7 +23,7 @@
 		"typescript": ">=4.5.0"
 	},
 	"scripts": {
-		"balances": "pnpm hardhat balances --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --count 10 --network mumbai",
+		"balance": "pnpm hardhat balance --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --network mumbai",
 		"deposit": "pnpm hardhat deposit --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --amount .00000001 --network mumbai",
 		"withdraw": "pnpm hardhat withdraw --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --amount 1 --network mumbai"
 	}
