@@ -32,7 +32,7 @@ contract Coins is IERC20 {
         _name = tokenName;
         _symbol = tokenSymbol;
         _deployer = msg.sender;
-        mint(msg.sender, 1000 * 1e18);
+        _mint(msg.sender, 1000 * 1e18);
     }
 
     /// @dev Returns name of token
@@ -123,4 +123,11 @@ contract Coins is IERC20 {
         _balances[_to] += _amount;
         _totalSupply += _amount;
     }
+
+    function _mint(address _to, uint256 _amount) internal virtual {
+        require(msg.sender == _deployer, "only contract owner can mint!");
+        _balances[_to] += _amount;
+        _totalSupply += _amount;
+    }
+    // TODO: burn, mint internal, common transfer.
 }

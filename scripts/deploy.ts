@@ -1,22 +1,22 @@
-import { ethers } from "hardhat";
+import { ethers, run } from "hardhat";
+import { WETH } from "../typechain-types";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const unlockTime = currentTimestampInSeconds + 60;
 
-  const lockedAmount = ethers.parseEther("0.001");
+  const contract: WETH = await ethers.deployContract("WETH");
 
-  const lock = await ethers.deployContract("Lock", [unlockTime], {
-    value: lockedAmount,
-  });
-
-  await lock.waitForDeployment();
+  await contract.waitForDeployment();
 
   console.log(
-    `Lock with ${ethers.formatEther(
-      lockedAmount
-    )}ETH and unlock timestamp ${unlockTime} deployed to ${lock.target}`
+    `contract deployed for token - , ${await contract.name()} | ${await contract.symbol()}`
   );
+
+  console.log("Address - ", await contract.getAddress());
+
+  await run("verify:verify", {
+    address: await contract.getAddress()
+  });
+
 }
 
 // We recommend this pattern to be able to use async/await everywhere

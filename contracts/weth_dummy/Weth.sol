@@ -1,12 +1,13 @@
 pragma solidity 0.8.20;
 
 import {Coins} from "../coin/Coins.sol";
-import "hardhat/console.sol";
 
 contract WETH is Coins {
-    constructor() Coins("wrapped ether", "WETH") {}
+    constructor() Coins("dummy wrapped ether", "WETH") {}
 
     function mint(address _to, uint256 _amount) public override {}
+
+    function _mint(address _to, uint256 _amount) internal override {}
 
     function deposit() public payable {
         require(msg.value > 10e8, "atleast 10e8 wei must be sent!");
