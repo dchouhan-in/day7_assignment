@@ -48,3 +48,5 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+require("./scripts/task")
