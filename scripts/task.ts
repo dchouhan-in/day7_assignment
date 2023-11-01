@@ -46,3 +46,29 @@ task("deposit", "Deposit to a weth contract!")
             "\n",
             "for reference txn-hash - ", tx.hash);
     });
+
+
+task("withdraw", "Deposit to a weth contract!")
+    .addParam("contract", "Contract address")
+    .addParam("amount", "Amount to deposit")
+    .setAction(async (arg) => {
+        const signers = await ethers.getSigners();
+        const contract: WETH = await ethers.getContractAt("WETH", arg.contract);
+        const signer = signers[0];
+
+        // Convert the amount to a BigNumber
+        const amountToWithdraw = BigInt(arg.amount.toString());
+
+
+        const signerBalance = await ethers.provider.getBalance(signer.address);
+        console.log("signerBalance - ", signerBalance, "\n", "toWithdraw - ", amountToWithdraw);
+
+        // Perform the deposit
+        const tx = await contract.connect(signer).withdraw(amountToWithdraw, { value: amountToWithdraw });
+        await tx.wait();
+
+
+        console.log(`Withdrawn ${ethers.formatEther(amountToWithdraw)} tokens into the contract.`,
+            "\n",
+            "for reference txn-hash - ", tx.hash);
+    });

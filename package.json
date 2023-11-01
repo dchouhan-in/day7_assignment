@@ -23,6 +23,7 @@
 	},
 	"scripts": {
 		"balances": "pnpm hardhat balances --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --count 10 --network mumbai",
-		"deposit": "pnpm hardhat deposit --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --amount .00000001 --network mumbai"
+		"deposit": "pnpm hardhat deposit --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --amount .00000001 --network mumbai",
+		"withdraw": "pnpm hardhat withdraw --contract 0xaE5863e003707ca37855bC1C3da4fC1437E42921 --amount 1 --network mumbai"
 	}
 }
