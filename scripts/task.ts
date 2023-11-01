@@ -29,15 +29,18 @@ task("deposit", "Deposit to a weth contract!")
         const amountToDeposit = ethers.parseEther(arg.amount.toString());
 
         // Ensure the signer has sufficient balance
-        const signerBalance = await contract.balanceOf(signer.address);
+        const signerBalance = await ethers.provider.getBalance(signer.address);
+        console.log("signerBalance - ", signerBalance, "\n", "toDeposit - ", amountToDeposit);
+
         if (signerBalance < amountToDeposit) {
             console.error("Signer does not have enough balance to deposit the specified amount.");
             return;
         }
 
         // Perform the deposit
-        const tx = await contract.connect(signer).transfer(arg.contract, amountToDeposit);
+        const tx = await contract.connect(signer).deposit({ value: amountToDeposit });
         await tx.wait();
+
 
         console.log(`Deposited ${ethers.formatEther(amountToDeposit)} tokens into the contract.`,
             "\n",
