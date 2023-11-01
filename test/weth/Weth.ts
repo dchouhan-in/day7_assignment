@@ -60,20 +60,30 @@ describe("Main", function () {
         it("should deposit ether", async () => {
             const initalEthersBalance = await ethers.provider.getBalance(ownerAddress);
 
-            await weth.deposit({ value: BigInt(10e9) });
+            await weth.deposit({ value: BigInt(10e18) });
             const balance = await weth.balanceOf(owner)
-            expect(balance).to.equals(10e10)
+            expect(balance).to.equals(1e10)
             const currentEthers = await ethers.provider.getBalance(ownerAddress);
             expect(currentEthers).to.lessThan(initalEthersBalance - BigInt(10e9))
             const currentSupply = await weth.totalSupply();
-            expect(currentSupply).to.equals(10e10);
+            expect(currentSupply).to.equals(1e10);
 
         });
 
         it("should withdraw ether", async () => {
-            await weth.withdraw(.5 * 10e10);
+            const balanceContractInitial = await ethers.provider.getBalance(wethAddress);
+            
+            const initialEthers = await ethers.provider.getBalance(ownerAddress);
+            await weth.withdraw(5 * 1e9);
+
             const balance = await weth.balanceOf(owner)
-            expect(balance).to.equals(.5 * 10e10)
+            const balanceContractCurrent = await ethers.provider.getBalance(wethAddress);
+            const currentEthers = await ethers.provider.getBalance(ownerAddress);
+            expect(balance).to.equals(5 * 10e8);
+            expect(balanceContractInitial).to.be.greaterThan(balanceContractCurrent);
+
+            expect(currentEthers).to.be.greaterThan(initialEthers);
+
         });
 
     });
