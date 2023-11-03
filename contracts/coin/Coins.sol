@@ -76,6 +76,7 @@ contract Coins is IERC20 {
 
         _balances[msg.sender] -= value;
         _balances[to] += value;
+        emit Transfer(msg.sender, to, value);
         return true;
     }
 
@@ -95,6 +96,7 @@ contract Coins is IERC20 {
         uint256 value
     ) external override returns (bool) {
         _allowances[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
         return true;
     }
 
@@ -112,6 +114,7 @@ contract Coins is IERC20 {
         _balances[from] -= value;
         _balances[to] += value;
         _allowances[from][msg.sender] -= value;
+        emit Transfer(from, to, value);
         return true;
     }
 
