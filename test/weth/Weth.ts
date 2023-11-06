@@ -1,11 +1,13 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Assets, weth } from "../typechain-types";
+import { Assets, WETH, WETH__factory, Coins } from "../../typechain-types";
+// Runtime Environment's members available in the global scope.
+import hre from "hardhat";
 
 
 describe("Main", function () {
-    let weth: weth
+    let weth: any
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
     let otherAccount2: HardhatEthersSigner
@@ -72,7 +74,7 @@ describe("Main", function () {
 
         it("should withdraw ether", async () => {
             const balanceContractInitial = await ethers.provider.getBalance(wethAddress);
-            
+
             const initialEthers = await ethers.provider.getBalance(ownerAddress);
             await weth.withdraw(5 * 1e9);
 
@@ -83,8 +85,22 @@ describe("Main", function () {
             expect(balanceContractInitial).to.be.greaterThan(balanceContractCurrent);
 
             expect(currentEthers).to.be.greaterThan(initialEthers);
-
         });
 
     });
+    describe("contract factory", async function () {
+        const Factory = await hre.ethers.getContractFactory("WETH");
+        const weth = await Factory.deploy();
+        console.log("weth deployed to:", await weth.getAddress());
+        const coinsFactory = await hre.ethers.getContractFactory("Coins");
+        const coins = await coinsFactory.deploy("TEST", "TS");
+
+        expect(await coins.symbol()).to.be("TS")
+        expect(await coins.name()).to.be("TEST")
+
+        console.log("coins deployed to:", await weth.getAddress());
+
+
+    });
+
 });
