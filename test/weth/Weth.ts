@@ -2,6 +2,7 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { Assets, weth } from "../typechain-types";
+import { AttackerContract, TargetContract } from "../../typechain-types";
 
 
 describe("Main", function () {
@@ -72,7 +73,7 @@ describe("Main", function () {
 
         it("should withdraw ether", async () => {
             const balanceContractInitial = await ethers.provider.getBalance(wethAddress);
-            
+
             const initialEthers = await ethers.provider.getBalance(ownerAddress);
             await weth.withdraw(5 * 1e9);
 
@@ -87,4 +88,35 @@ describe("Main", function () {
         });
 
     });
+
+    describe("reentrancy", async () => {
+
+        let target: TargetContract
+        let attacker: AttackerContract
+
+        before("deploy!", async () => {
+            const targetFactory = await ethers.getContractFactory("TargetContract");
+            target = await targetFactory.deploy({ value: ethers.parseUnits("100") });
+            await target.waitForDeployment();
+            const attackerFactory = await ethers.getContractFactory("AttackerContract");
+            attacker = await attackerFactory.deploy(target);
+            await attacker.waitForDeployment();
+        })
+
+        it("target contract must have 100 ethers!", async () => {
+            const balance = await ethers.provider.getBalance(target)
+            expect(balance).to.equals(100n * BigInt(1e18))
+        })
+
+        it("must deposit to target!", async () => {
+            const address = await attacker.getAddress();
+            console.log(address, "<<<");
+            const contractSigner = await ethers.getSigner(address);
+
+            await target.connect(contractSigner).deposit({ value: ethers.parseUnits("10", "gwei") });
+        })
+
+
+
+    })
 });

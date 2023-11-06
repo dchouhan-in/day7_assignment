@@ -1,7 +1,8 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { Assets, Coins } from "../typechain-types";
+import { Assets, Coins, AttackerContract } from "../typechain-types";
+import { TargetContract } from "../typechain-types/reentrancy";
 
 
 describe("Main", function () {
@@ -12,7 +13,6 @@ describe("Main", function () {
     let owner: HardhatEthersSigner
     let otherAccount: HardhatEthersSigner
     let otherAccount2: HardhatEthersSigner
-    let coinsAddress: string
     let ownerAddress: string
     let otherAccountAddress: string
     let otherAccount2Address: string
@@ -58,7 +58,7 @@ describe("Main", function () {
 
         it("should have the correct total supply", async () => {
             const totalSupply = await coins.totalSupply();
-            expect(totalSupply).to.equal(BigInt(1000) * BigInt(10n**18n) + BigInt(1000))
+            expect(totalSupply).to.equal(BigInt(1000) * BigInt(10n ** 18n) + BigInt(1000))
         });
 
         it("should have the correct decimals", async () => {
@@ -207,6 +207,8 @@ describe("Main", function () {
             expect(newOwner).to.equals(otherAccountAddress)
 
         })
+
+
 
     })
 
