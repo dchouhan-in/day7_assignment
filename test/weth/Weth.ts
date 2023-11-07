@@ -1,6 +1,6 @@
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { expect } from "chai";
-import { ethers } from "hardhat";
+import { ethers, network } from "hardhat";
 import { Assets, weth } from "../typechain-types";
 import { AttackerContract, TargetContract } from "../../typechain-types";
 
@@ -99,22 +99,50 @@ describe("Main", function () {
             target = await targetFactory.deploy({ value: ethers.parseUnits("100") });
             await target.waitForDeployment();
             const attackerFactory = await ethers.getContractFactory("AttackerContract");
-            attacker = await attackerFactory.deploy(target);
+            attacker = await attackerFactory.deploy(target, { value: ethers.parseUnits("100") });
             await attacker.waitForDeployment();
         })
 
-        it("target contract must have 100 ethers!", async () => {
+        it("target and attacker contract must have 100 ethers!", async () => {
             const balance = await ethers.provider.getBalance(target)
+            const balanceAttacker = await ethers.provider.getBalance(attacker)
             expect(balance).to.equals(100n * BigInt(1e18))
+            expect(balanceAttacker).to.equals(100n * BigInt(1e18))
         })
 
         it("must deposit to target!", async () => {
             const address = await attacker.getAddress();
-            console.log(address, "<<<");
             const contractSigner = await ethers.getSigner(address);
 
-            await target.connect(contractSigner).deposit({ value: ethers.parseUnits("10", "gwei") });
+            await network.provider.request({
+                method: "hardhat_impersonateAccount",
+                params: [address],
+            });
+
+            await target.connect(contractSigner).deposit({ value: ethers.parseEther("1") });
+
+            await network.provider.request({
+                method: "hardhat_stopImpersonatingAccount",
+                params: [address],
+            });
+
         })
+
+        it("must drain down target contract's balance!", async () => {
+            await target.balances(attacker);
+
+            try {
+                await attacker.startAttack()
+            } catch (error) {
+            }
+
+            const balance = await ethers.provider.getBalance(target)
+
+            expect(balance).to.lessThan(BigInt(1e18))
+        })
+
+
+
 
 
 
