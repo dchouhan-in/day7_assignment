@@ -8,7 +8,6 @@ contract TargetContract {
     constructor() payable {}
 
     function deposit() public payable {
-        console.log(msg.sender, "<<<<<< test");
         balances[msg.sender] += msg.value;
     }
 
