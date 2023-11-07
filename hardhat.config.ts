@@ -6,13 +6,13 @@ const config: HardhatUserConfig = {
 
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {
-      forking: {
-        url: process.env.MUMBAI_URL!,
-        blockNumber: 41895504,
-      },
-      chainId: Number(process.env.CHAIN_ID)
-    },
+    // hardhat: {
+      // forking: {
+        // url: process.env.MUMBAI_URL!,
+        // blockNumber: 41895504,
+      // },
+      // chainId: Number(process.env.CHAIN_ID)
+    // },
     mumbai: {
       url: process.env.MUMBAI_URL,
       chainId: Number(process.env.CHAIN_ID),
@@ -34,7 +34,7 @@ const config: HardhatUserConfig = {
     ]
   },
   paths: {
-    sources: "./contracts/weth_dummy",
+    sources: "./contracts",
     tests: "./test/weth",
     cache: "./cache",
     artifacts: "./artifacts"
